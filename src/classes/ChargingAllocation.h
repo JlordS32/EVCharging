@@ -23,6 +23,7 @@ private:
     int findClosestReachableStation(int remainRange);
     ChargingStation *allocateCharger(int index);
     void checkCharge(Vehicle *vehicle);
+    void monteCarlo(Vehicle *vehicle);
 
 public:
     void run(string fileName = "");
@@ -162,6 +163,22 @@ void ChargingAllocation::checkCharge(Vehicle *vehicle)
     else
     {
         cout << setw(20) << "----";
+    }
+}
+
+void ChargingAllocation::monteCarlo(Vehicle *vehicle)
+{
+    for (Vehicle &vehicle : this->vehicles)
+    {
+        vehicle.print();
+
+        // Check for first charge
+        checkCharge(&vehicle);
+
+        // Check for second charge
+        checkCharge(&vehicle);
+
+        cout << endl;
     }
 }
 
