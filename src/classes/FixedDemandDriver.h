@@ -68,15 +68,6 @@ void FixedDemandDriver::run(string fileName) {
 }
 
 void FixedDemandDriver::print() {
-    cout << "VEHICLE INFORMATION" << endl;
-    cout << "-------------------------------------------------------------------------------------------" << endl;
-    cout << "Vehicle Id" << setw(15) 
-         << "Origin" << setw(20)
-         << "Destination" << setw(25)
-         << "Capacity Range" << setw(20) 
-         << "Remaining Range" << endl;
-    cout << "-------------------------------------------------------------------------------------------" << endl;
-    
     for (int i = 0; i < this->vehicles.size(); i++) {
         this->vehicles[i].print();
     }

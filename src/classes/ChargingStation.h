@@ -2,6 +2,7 @@
 #define CHARGINGSTATION_H
 
 #include <iostream>
+#include <iomanip>
 #include "../assets/Constant.h"
 using namespace std;
 
@@ -12,33 +13,38 @@ private:
     string cityName;
     int distanceToLastCity;
     int numberOfChargers;
-    void print();
-    
+
 public:
-    ChargingStation(int cityId, string cityName, int distanceToLastCity, int numberOfChargers)
-        : cityId(cityId),
-          cityName(cityName),
-          distanceToLastCity(distanceToLastCity),
-          numberOfChargers(numberOfChargers)
+    ChargingStation(int station)
     {
+        this->cityId = station;
+        this->cityName = nameMap[station];
+        this->distanceToLastCity = distanceMap[station];
+        this->numberOfChargers = chargersMap[station];
     }
 
     int distanceToSydney(int cityId);
+    void print();
 };
 
-int ChargingStation::distanceToSydney(int cityId) {
+int ChargingStation::distanceToSydney(int cityId)
+{
     int totalDistance;
 
-    for (int i = 0; i <= cityId; i++) {
+    for (int i = 0; i <= cityId; i++)
+    {
         totalDistance += distanceMap[i];
     }
 
     return totalDistance;
 }
 
-void ChargingStation::print() {
-    
+void ChargingStation::print()
+{
+    cout << setw(5) << this->cityId << setw(25);
+    cout << this->cityName << setw(15);
+    cout << distanceToSydney(this->cityId) << setw(25);
+    cout << this->numberOfChargers << endl;
 }
-
 
 #endif
