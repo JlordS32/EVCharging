@@ -9,51 +9,54 @@ using namespace std;
 
 const int NUM_STATIONS = 12;
 
-void displayChargingStationHeader();
+int main()
+{
+     ChargingAllocation allocate;
 
-int main() {
-    ChargingAllocation allocate;
-    
-    string fileName = allocate.queryFile();
-    allocate.run(fileName);
+     string fileName = allocate.queryFile();
+     allocate.run(fileName);
 
-    cout << "\n\nVEHICLE INFORMATION: " << endl;
-    cout << Utility::headerBuilder(91);
-    cout << "Vehicle Id" << setw(15) 
-         << "Origin" << setw(20)
-         << "Destination" << setw(25)
-         << "Capacity Range" << setw(20) 
-         << "Remaining Range" << endl;
-    cout << Utility::headerBuilder(91);
-    allocate.printVehicles();
+     cout << "\n\nVEHICLE INFORMATION: " << endl;
+     cout << Utility::headerBuilder(91);
+     cout << "Vehicle Id" << setw(15)
+          << "Origin" << setw(20)
+          << "Destination" << setw(25)
+          << "Capacity Range" << setw(20)
+          << "Remaining Range" << endl;
+     cout << Utility::headerBuilder(91);
+     allocate.printVehicles();
 
-    // displayChargingStationHeader();
-    // for (int i = 0; i < NUM_STATIONS; i++) {
-    //     stations.push_back(ChargingStation(i));
-    //     stations[i].print();
-    // }
+     cout << "\n\nCHARGING STATION INFORMATION: " << endl;
+     cout << Utility::headerBuilder(82);
+     cout << "Location Id" << setw(20)
+          << "Location Name" << setw(25)
+          << "Distance to Last City" << setw(25)
+          << "Number of Chargers" << endl;
+     cout << Utility::headerBuilder(82);
+     allocate.printChargingStations();
 
-    cout << "\n\nInitialising charging allocation..." << endl;
-    cout << Utility::headerBuilder(131);
-    cout << "Vehicle Id" << setw(15) 
-         << "Origin" << setw(20)
-         << "Destination" << setw(25)
-         << "Capacity Range" << setw(20) 
-         << "Remaining Range" << setw(20)
-         << "First Recharge" << setw(20) 
-         << "Second Recharge" << endl;
-    cout << Utility::headerBuilder(131);
-    allocate.printChargeAllocation();
+     cout << "\n\nInitialising charging allocation..." << endl;
+     cout << Utility::headerBuilder(131);
+     cout << "Vehicle Id" << setw(15)
+          << "Origin" << setw(20)
+          << "Destination" << setw(25)
+          << "Capacity Range" << setw(20)
+          << "Remaining Range" << setw(20)
+          << "First Recharge" << setw(20)
+          << "Second Recharge" << endl;
+     cout << Utility::headerBuilder(131);
+     allocate.printChargeAllocation();
 
-    return 0;
-}
+     cout << "\n\nAVERAGE WAITING TIME: " << endl;
+     cout << Utility::headerBuilder(122);
+     cout << "Location Id" << setw(20)
+          << "Location Name" << setw(25)
+          << "Distance to Last City" << setw(25)
+          << "Number of Chargers" << setw(20)
+          << "Queue Length" << setw(20)
+          << "Waiting Hours" << endl;
+     cout << Utility::headerBuilder(122);
+     allocate.printAvgWaitingTime();
 
-void displayChargingStationHeader() {
-    cout << "\n\nCHARGING STATION INFORMATION: " << endl;
-    cout << Utility::headerBuilder(131);
-    cout << "Location Id" << setw(20)
-         << "Location Name" << setw(25)
-         << "Distance to Last City" << setw(25)
-         << "Number of Chargers" << endl;
-    cout << Utility::headerBuilder(131);
+     return 0;
 }

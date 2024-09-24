@@ -30,6 +30,7 @@ public:
     int farthestDistance();
 
     // Getters
+    int getVehicleId();
     int getCurrentCityId();
     int getDestinationId();
     int getCapacity();
@@ -54,7 +55,7 @@ int Vehicle::farthestDistance() {
     int range = this->remainRange;
 
     for (int i = this->currentCityId; i <= this->destinationId; i++) {
-        if (range <= 0) {
+        if (range < 0) {
             return totalDistance;
         }
 
@@ -63,6 +64,10 @@ int Vehicle::farthestDistance() {
     }
 
     return totalDistance;
+}
+
+int Vehicle::getVehicleId() {
+    return this->vehicleId;
 }
 
 int Vehicle::getCurrentCityId() {
@@ -82,12 +87,12 @@ int Vehicle::getRemainingRange() {
 
 void Vehicle::fillUp(int capacity) {
     if (capacity <= 0) {
-        cout << "Error: Vehicle " << this->vehicleId << " cannot fill up. Capacity must be greater than 0." << endl;
+        cout << "\n\nError: Vehicle " << this->vehicleId << " cannot fill up. Capacity must be greater than 0." << endl;
         exit(1);
     }
     
     if (capacity > this->capacityRange) {
-        cout << "Error: Vehicle " << this->vehicleId << " cannot fill up. Capacity range exceeded." << endl;
+        cout << "\n\nError: Vehicle " << this->vehicleId << " cannot fill up. Capacity range exceeded." << endl;
         exit(1);
     }
 

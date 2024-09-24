@@ -22,15 +22,21 @@ public:
         this->cityName = nameMap[station];
         this->distanceToLastCity = distanceMap[station];
         this->numberOfChargers = chargersMap[station];
+        this->queueLength = 0;
     }
     
     int distanceToSydney();
     int distanceToSydney(int cityId);
     void print();
+
+    // Getters
     int getId();
     int getQueueLength();
-    void incrementQueueLength();
     string getCityName();
+    double getAvgWaitingTime();
+
+    // Setters
+    void incrementQueueLength();
 };
 
 int ChargingStation::distanceToSydney(int cityId)
@@ -62,7 +68,7 @@ void ChargingStation::print()
     cout << setw(5) << this->cityId << setw(25);
     cout << this->cityName << setw(15);
     cout << distanceToSydney(this->cityId) << setw(25);
-    cout << this->numberOfChargers << endl;
+    cout << this->numberOfChargers;
 }
 
 int ChargingStation::getId() {
@@ -71,6 +77,10 @@ int ChargingStation::getId() {
 
 int ChargingStation::getQueueLength() {
     return this->queueLength;
+}
+
+double ChargingStation::getAvgWaitingTime() {
+    return (0.5 * this->queueLength) / this->numberOfChargers;
 }
 
 void ChargingStation::incrementQueueLength() {

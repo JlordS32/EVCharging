@@ -27,7 +27,9 @@ private:
 public:
     void run(string fileName = "");
     void printVehicles();
+    void printChargingStations();
     void printChargeAllocation();
+    void printAvgWaitingTime();
     string queryFile();
 
     ChargingAllocation()
@@ -97,14 +99,32 @@ void ChargingAllocation::printVehicles()
     }
 }
 
+void ChargingAllocation::printChargingStations()
+{
+    for (int i = 0; i < this->stations.size(); i++)
+    {
+        stations[i].print();
+        cout << endl;
+    }
+}
+
+void ChargingAllocation::printAvgWaitingTime()
+{
+    for (int i = 0; i < this->stations.size(); i++)
+    {
+        stations[i].print();
+
+        cout << setw(25) << stations[i].getQueueLength();
+        cout << setw(20) << stations[i].getAvgWaitingTime() << " hours";
+        cout << endl;
+    }
+}
+
 void ChargingAllocation::printChargeAllocation()
 {
     for (Vehicle &vehicle : this->vehicles)
     {
         vehicle.print();
-
-        int remainingRange = vehicle.getRemainingRange();
-        int destinationDistance = this->stations[vehicle.getDestinationId()].distanceToSydney();
 
         // Check for first charge
         checkCharge(&vehicle);
@@ -118,15 +138,21 @@ void ChargingAllocation::printChargeAllocation()
 
 void ChargingAllocation::checkCharge(Vehicle *vehicle)
 {
-    int farthestDistance = vehicle->farthestDistance();
-    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney();
-    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney();
+    int remainingRange = vehicle->getRemainingRange();
+    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
+    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney(vehicle->getCurrentCityId());
+    int currentDistance = destinationDistance - currentLocationDistance;
 
-    if (farthestDistance < (destinationDistance - currentLocationDistance))
+    if (remainingRange < currentDistance)
     {
         // Find the closest station
-        int closestStation = findClosestReachableStation(vehicle->getRemainingRange());
+        int closestStation = findClosestReachableStation(vehicle->getRemainingRange() + currentLocationDistance);
+
+        // Get station and increment queue
         ChargingStation *charger = allocateCharger(closestStation);
+        charger->incrementQueueLength();
+
+        // Update remaining range to full and update location.
         vehicle->fillUp(vehicle->getCapacity());
         vehicle->updateLocation(closestStation);
 
@@ -134,7 +160,7 @@ void ChargingAllocation::checkCharge(Vehicle *vehicle)
     }
     else
     {
-        cout << setw(20) << "---";
+        cout << setw(20) << "----";
     }
 }
 
