@@ -1,5 +1,5 @@
-#ifndef FIXEDDEMANDDRIVER_H
-#define FIXEDDEMANDDRIVER_H
+#ifndef READER_H
+#define READER_H
 
 #include <iostream>
 #include <fstream>
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-class FixedDemandDriver {
+class Reader {
 private:
     vector<Vehicle> vehicles;
 
@@ -22,7 +22,7 @@ public:
     string queryFile();
 };
 
-string FixedDemandDriver::queryFile() {
+string Reader::queryFile() {
     string fileName;
     cout << "Enter file name: ";
     getline(cin, fileName);
@@ -30,7 +30,7 @@ string FixedDemandDriver::queryFile() {
     return fileName;
 }
 
-void FixedDemandDriver::run(string fileName) {
+void Reader::run(string fileName) {
     ifstream fin;
     fin.open(fileName);
 
@@ -60,14 +60,14 @@ void FixedDemandDriver::run(string fileName) {
         int remainRange = stoi(parts[3]);
 
         // Create object
-        Vehicle vehicle = Vehicle(vehicleId, destinationId, capacityRange, remainRange);
+        Vehicle vehicle = Vehicle(vehicleId, 0, destinationId, capacityRange, remainRange);
         this->vehicles.push_back(vehicle);
     }
 
     fin.close();
 }
 
-void FixedDemandDriver::print() {
+void Reader::print() {
     for (int i = 0; i < this->vehicles.size(); i++) {
         this->vehicles[i].print();
     }

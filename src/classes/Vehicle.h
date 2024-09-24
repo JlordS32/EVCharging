@@ -17,10 +17,10 @@ private:
     
 public:
 
-    Vehicle(int vehicleId, int destinationId, int capacityRange, int remainRange)
+    Vehicle(int vehicleId, int currentCityId, int destinationId, int capacityRange, int remainRange)
     {
         this->vehicleId = vehicleId;
-        this->currentCityId = 0;
+        this->currentCityId = currentCityId;
         this->destinationId = destinationId;
         this->capacityRange = capacityRange;
         this->remainRange = remainRange;
