@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 class Utility
@@ -11,6 +12,7 @@ public:
     static string *split(string str, string seperator, int &size);
     static string headerBuilder(int size);
     static int sum(int *array, int size);
+    static int sum(vector<int> array);
 };
 
 string *Utility::split(string str, string seperator, int &size)
@@ -79,15 +81,5 @@ void Utility::removeStr(string &str, string target)
 }
 
 string Utility::headerBuilder(int size) { return string(size, '-') + "\n"; }
-
-int Utility::sum(int *array, int size)
-{
-    int total = 0;
-    for (int i = 0; i < size; i++)
-    {
-        total += array[i];
-    }
-    return total;
-}
 
 #endif

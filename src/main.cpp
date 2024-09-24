@@ -58,5 +58,8 @@ int main()
      cout << Utility::headerBuilder(122);
      allocate.printAvgWaitingTime();
 
+     // Print overall waiting time
+     allocate.printOverallWaitingTime();
+
      return 0;
 }

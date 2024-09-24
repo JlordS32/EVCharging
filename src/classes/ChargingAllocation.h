@@ -30,6 +30,7 @@ public:
     void printChargingStations();
     void printChargeAllocation();
     void printAvgWaitingTime();
+    void printOverallWaitingTime();
     string queryFile();
 
     ChargingAllocation()
@@ -182,6 +183,17 @@ int ChargingAllocation::findClosestReachableStation(int remainRange)
 ChargingStation *ChargingAllocation::allocateCharger(int index)
 {
     return &this->stations[index];
+}
+
+void ChargingAllocation::printOverallWaitingTime() {
+    double n;
+    double m;
+    for (ChargingStation &station : this->stations) {
+        n += station.getQueueLength();
+        m += station.getQueueLength() * station.getAvgWaitingTime();
+    }
+
+    cout << endl << "OVERALL AVG WAITING TIME PER VEHICLE: " << (1 / n) * m << " hours" << endl;
 }
 
 #endif
