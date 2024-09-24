@@ -25,7 +25,7 @@ int main() {
          << "Capacity Range" << setw(20) 
          << "Remaining Range" << endl;
     cout << Utility::headerBuilder(91);
-    allocate.print();
+    allocate.printVehicles();
 
     // displayChargingStationHeader();
     // for (int i = 0; i < NUM_STATIONS; i++) {
@@ -43,7 +43,7 @@ int main() {
          << "First Recharge" << setw(20) 
          << "Second Recharge" << endl;
     cout << Utility::headerBuilder(131);
-    allocate.needToRecharge();
+    allocate.printChargeAllocation();
 
     return 0;
 }

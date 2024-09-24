@@ -21,12 +21,13 @@ private:
     vector<ChargingStation> stations;
 
     int findClosestReachableStation(int remainRange);
-    ChargingStation* allocateCharger(int index);
+    ChargingStation *allocateCharger(int index);
+    void checkCharge(Vehicle *vehicle);
 
 public:
     void run(string fileName = "");
-    void print();
-    void needToRecharge();
+    void printVehicles();
+    void printChargeAllocation();
     string queryFile();
 
     ChargingAllocation()
@@ -87,43 +88,64 @@ void ChargingAllocation::run(string fileName)
     fin.close();
 }
 
-void ChargingAllocation::print()
+void ChargingAllocation::printVehicles()
 {
-    for (Vehicle &vehicle : this->vehicles) {
+    for (Vehicle &vehicle : this->vehicles)
+    {
         vehicle.print();
         cout << endl;
     }
 }
 
-void ChargingAllocation::needToRecharge()
+void ChargingAllocation::printChargeAllocation()
 {
     for (Vehicle &vehicle : this->vehicles)
     {
         vehicle.print();
 
-        int farthestDistance = vehicle.farthestDistance();
+        int remainingRange = vehicle.getRemainingRange();
         int destinationDistance = this->stations[vehicle.getDestinationId()].distanceToSydney();
 
-        if (farthestDistance <= destinationDistance)
-        {
-            // Find the closest station
-            int closestStation = findClosestReachableStation(vehicle.getRemainingRange());
-            ChargingStation* charger = allocateCharger(closestStation);
+        // Check for first charge
+        checkCharge(&vehicle);
 
-            cout << setw(20) << charger->getCityName();
-        } else {
-            cout << setw(20) << "N/A";
-        }
+        // Check for second charge
+        checkCharge(&vehicle);
 
         cout << endl;
     }
 }
 
-int ChargingAllocation::findClosestReachableStation(int remainRange) {
+void ChargingAllocation::checkCharge(Vehicle *vehicle)
+{
+    int farthestDistance = vehicle->farthestDistance();
+    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney();
+    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney();
+
+    if (farthestDistance < (destinationDistance - currentLocationDistance))
+    {
+        // Find the closest station
+        int closestStation = findClosestReachableStation(vehicle->getRemainingRange());
+        ChargingStation *charger = allocateCharger(closestStation);
+        vehicle->fillUp(vehicle->getCapacity());
+        vehicle->updateLocation(closestStation);
+
+        cout << setw(20) << charger->getCityName();
+    }
+    else
+    {
+        cout << setw(20) << "---";
+    }
+}
+
+int ChargingAllocation::findClosestReachableStation(int remainRange)
+{
     int closestStationIndex = -1;
 
-    for (int i = 0; i < NUM_CITIES; i++) {
-        if (stations[i].distanceToSydney() >= remainRange) {
+    for (int i = 0; i < NUM_CITIES; i++)
+    {
+        if (stations[i].distanceToSydney() >= remainRange)
+        {
             return i - 1;
         }
     }
@@ -131,7 +153,8 @@ int ChargingAllocation::findClosestReachableStation(int remainRange) {
     return closestStationIndex;
 }
 
-ChargingStation* ChargingAllocation::allocateCharger(int index) {
+ChargingStation *ChargingAllocation::allocateCharger(int index)
+{
     return &this->stations[index];
 }
 

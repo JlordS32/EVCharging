@@ -35,7 +35,7 @@ public:
 
 int ChargingStation::distanceToSydney(int cityId)
 {
-    int totalDistance;
+    int totalDistance = 0;
 
     for (int i = 0; i <= cityId; i++)
     {
@@ -47,7 +47,7 @@ int ChargingStation::distanceToSydney(int cityId)
 
 int ChargingStation::distanceToSydney()
 {
-    int totalDistance;
+    int totalDistance = 0;
 
     for (int i = 0; i <= this->cityId; i++)
     {

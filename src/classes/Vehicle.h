@@ -15,7 +15,6 @@ private:
     int capacityRange;
     int remainRange;
     
-    int calculateTravelDistance();
 public:
 
     Vehicle(int vehicleId, int currentCityId, int destinationId, int capacityRange, int remainRange)
@@ -29,8 +28,16 @@ public:
 
     void print();
     int farthestDistance();
-    int getRemainingRange();
+
+    // Getters
+    int getCurrentCityId();
     int getDestinationId();
+    int getCapacity();
+    int getRemainingRange();
+
+    // Setters
+    void fillUp(int capacity);
+    void updateLocation(int currentLocationId);
 };
 
 void Vehicle::print()
@@ -43,27 +50,52 @@ void Vehicle::print()
 }
 
 int Vehicle::farthestDistance() {
-    int totalDistance;
+    int totalDistance = 0;
     int range = this->remainRange;
 
-    for (int i = this->currentCityId; i < this->destinationId; i++) {
-        totalDistance += distanceMap[i];
-        range -= distanceMap[i];
-
+    for (int i = this->currentCityId; i <= this->destinationId; i++) {
         if (range <= 0) {
             return totalDistance;
         }
+
+        totalDistance += distanceMap[i];
+        range -= distanceMap[i];
     }
 
     return totalDistance;
+}
+
+int Vehicle::getCurrentCityId() {
+    return this->currentCityId;
+}
+int Vehicle::getDestinationId() {
+    return this->destinationId;
+}
+
+int Vehicle::getCapacity() {
+    return this->capacityRange;
 }
 
 int Vehicle::getRemainingRange() {
     return this->remainRange;
 }
 
-int Vehicle::getDestinationId() {
-    return this->destinationId;
+void Vehicle::fillUp(int capacity) {
+    if (capacity <= 0) {
+        cout << "Error: Vehicle " << this->vehicleId << " cannot fill up. Capacity must be greater than 0." << endl;
+        exit(1);
+    }
+    
+    if (capacity > this->capacityRange) {
+        cout << "Error: Vehicle " << this->vehicleId << " cannot fill up. Capacity range exceeded." << endl;
+        exit(1);
+    }
+
+    this->remainRange = capacity;
+}
+
+void Vehicle::updateLocation(int currentLocationId) {
+    this->currentCityId = currentLocationId;
 }
 
 #endif
