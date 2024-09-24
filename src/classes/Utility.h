@@ -4,14 +4,15 @@
 #include <iostream>
 using namespace std;
 
-class Utility {
+class Utility
+{
 public:
     static void removeStr(string &str, string target);
-    static string* split(string str, string seperator, int &size);
+    static string *split(string str, string seperator, int &size);
+    static string headerBuilder(int size);
 };
 
-
-string* Utility::split(string str, string seperator, int &size)
+string *Utility::split(string str, string seperator, int &size)
 {
     string *val;
     size = 1;
@@ -75,5 +76,7 @@ void Utility::removeStr(string &str, string target)
         }
     }
 }
+
+string Utility::headerBuilder(int size) { return string(size, '-') + "\n"; }
 
 #endif

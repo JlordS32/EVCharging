@@ -15,6 +15,7 @@ private:
     int capacityRange;
     int remainRange;
     
+    int calculateTravelDistance();
 public:
 
     Vehicle(int vehicleId, int currentCityId, int destinationId, int capacityRange, int remainRange)
@@ -27,8 +28,9 @@ public:
     }
 
     void print();
-    bool needToCharge();
-    int calculateTravelDistance();
+    int farthestDistance();
+    int getRemainingRange();
+    int getDestinationId();
 };
 
 void Vehicle::print()
@@ -38,25 +40,30 @@ void Vehicle::print()
     cout << setw(20) << nameMap[destinationId];
     cout << setw(20) << capacityRange;
     cout << setw(20) << remainRange;
-    cout << endl;
 }
 
-bool Vehicle::needToCharge() {
-    if (calculateTravelDistance() >= remainRange) {
-        return true;
-    }
-
-    return false;
-}
-
-int Vehicle::calculateTravelDistance() {
+int Vehicle::farthestDistance() {
     int totalDistance;
+    int range = this->remainRange;
 
     for (int i = this->currentCityId; i < this->destinationId; i++) {
         totalDistance += distanceMap[i];
+        range -= distanceMap[i];
+
+        if (range <= 0) {
+            return totalDistance;
+        }
     }
 
     return totalDistance;
+}
+
+int Vehicle::getRemainingRange() {
+    return this->remainRange;
+}
+
+int Vehicle::getDestinationId() {
+    return this->destinationId;
 }
 
 #endif

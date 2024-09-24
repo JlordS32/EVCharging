@@ -50,6 +50,7 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "iomanip": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "vector": "cpp"
     }
 }
