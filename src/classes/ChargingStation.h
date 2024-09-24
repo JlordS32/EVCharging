@@ -12,6 +12,7 @@ private:
     string cityName;
     int distanceToLastCity;
     int numberOfChargers;
+    void print();
     
 public:
     ChargingStation(int cityId, string cityName, int distanceToLastCity, int numberOfChargers)
@@ -33,6 +34,10 @@ int ChargingStation::distanceToSydney(int cityId) {
     }
 
     return totalDistance;
+}
+
+void ChargingStation::print() {
+    
 }
 
 

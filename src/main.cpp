@@ -1,13 +1,15 @@
 #include <iostream>
 
-#include "./classes/ChargingStation.h"
-#include "./classes/Vehicle.h"
+using namespace std;
+
+#include "./classes/FixedDemandDriver.h"
 
 int main() {
+    FixedDemandDriver driver;
 
-    ChargingStation s(0, "Sydney", 2, 0);
-
-    cout << s.distanceToSydney(2) << endl;
+    string fileName = driver.queryFile();
+    driver.run("./assets/files/" + fileName);
+    driver.print();
 
     return 0;
 }

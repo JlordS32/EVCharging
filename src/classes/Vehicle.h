@@ -34,6 +34,7 @@ public:
 void Vehicle::print()
 {
     cout << setw(5) << vehicleId;
+    cout << setw(20) << nameMap[currentCityId];
     cout << setw(20) << nameMap[destinationId];
     cout << setw(20) << capacityRange;
     cout << setw(20) << remainRange;
