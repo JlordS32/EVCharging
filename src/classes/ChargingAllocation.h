@@ -22,8 +22,8 @@ private:
 
     int findClosestReachableStation(int remainRange);
     ChargingStation *allocateCharger(int index);
-    void checkCharge(Vehicle *vehicle);
-    void monteCarlo(Vehicle *vehicle);
+    void checkCharge(Vehicle *vehicle, bool random = false);
+    double getOverallWaitingTime();
 
 public:
     void run(string fileName = "");
@@ -31,7 +31,7 @@ public:
     void printChargingStations();
     void printChargeAllocation();
     void printAvgWaitingTime();
-    void printOverallWaitingTime();
+    void balancedSimulation();
     string queryFile();
 
     ChargingAllocation()
@@ -120,11 +120,13 @@ void ChargingAllocation::printAvgWaitingTime()
         cout << setw(20) << stations[i].getAvgWaitingTime() << " hours";
         cout << endl;
     }
+
+    cout << "\nOVERALL AVG WAITING TIME FOR EACH VEHICLE: " << getOverallWaitingTime() << " hrs";
 }
 
 void ChargingAllocation::printChargeAllocation()
 {
-    for (Vehicle &vehicle : this->vehicles)
+    for (Vehicle vehicle : this->vehicles)
     {
         vehicle.print();
 
@@ -136,9 +138,14 @@ void ChargingAllocation::printChargeAllocation()
 
         cout << endl;
     }
+
+    for (int i = 0; i < stations.size(); i++)
+    {
+        stations[i].resetQueue();
+    }
 }
 
-void ChargingAllocation::checkCharge(Vehicle *vehicle)
+void ChargingAllocation::checkCharge(Vehicle *vehicle, bool random)
 {
     int remainingRange = vehicle->getRemainingRange();
     int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
@@ -148,7 +155,16 @@ void ChargingAllocation::checkCharge(Vehicle *vehicle)
     if (remainingRange < currentDistance)
     {
         // Find the closest station
-        int closestStation = findClosestReachableStation(vehicle->getRemainingRange() + currentLocationDistance);
+        int closestStation = -1;
+
+        if (random)
+        {
+            closestStation = findClosestReachableStation(currentLocationDistance + rand() % vehicle->getRemainingRange());
+        }
+        else
+        {
+            closestStation = findClosestReachableStation(currentLocationDistance + vehicle->getRemainingRange());
+        }
 
         // Get station and increment queue
         ChargingStation *charger = allocateCharger(closestStation);
@@ -158,28 +174,44 @@ void ChargingAllocation::checkCharge(Vehicle *vehicle)
         vehicle->fillUp(vehicle->getCapacity());
         vehicle->updateLocation(closestStation);
 
-        cout << setw(20) << charger->getCityName();
+        // cout << setw(20) << charger->getCityName();
     }
     else
     {
-        cout << setw(20) << "----";
+        // cout << setw(20) << "----";
     }
 }
 
-void ChargingAllocation::monteCarlo(Vehicle *vehicle)
+void ChargingAllocation::balancedSimulation()
 {
-    for (Vehicle &vehicle : this->vehicles)
+    double overallWaitingTime = 1000;
+    int numSimulations = 1000;
+    for (int i = 0; i < numSimulations; i++)
     {
-        vehicle.print();
+        for (Vehicle vehicle : this->vehicles)
+        {
+            // vehicle.print();
 
-        // Check for first charge
-        checkCharge(&vehicle);
+            // Check for first charge
+            checkCharge(&vehicle, true);
 
-        // Check for second charge
-        checkCharge(&vehicle);
+            // Check for second charge
+            checkCharge(&vehicle, true);
+        }
 
-        cout << endl;
+        double temp = getOverallWaitingTime();
+
+        for (int i = 0; i < stations.size(); i++)
+        {
+            stations[i].resetQueue();
+        }
+
+        if (temp < overallWaitingTime) {
+            overallWaitingTime = temp;
+        }
     }
+
+    cout << "BEST: " << overallWaitingTime << " hours";
 }
 
 int ChargingAllocation::findClosestReachableStation(int remainRange)
@@ -202,15 +234,17 @@ ChargingStation *ChargingAllocation::allocateCharger(int index)
     return &this->stations[index];
 }
 
-void ChargingAllocation::printOverallWaitingTime() {
+double ChargingAllocation::getOverallWaitingTime()
+{
     double n;
     double m;
-    for (ChargingStation &station : this->stations) {
+    for (ChargingStation &station : this->stations)
+    {
         n += station.getQueueLength();
         m += station.getQueueLength() * station.getAvgWaitingTime();
     }
 
-    cout << endl << "OVERALL AVG WAITING TIME PER VEHICLE: " << (1 / n) * m << " hours" << endl;
+    return (1 / n) * m;
 }
 
 #endif

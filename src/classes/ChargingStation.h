@@ -37,6 +37,7 @@ public:
 
     // Setters
     void incrementQueueLength();
+    void resetQueue();
 };
 
 int ChargingStation::distanceToSydney(int cityId)
@@ -85,6 +86,10 @@ double ChargingStation::getAvgWaitingTime() {
 
 void ChargingStation::incrementQueueLength() {
     this->queueLength++;
+}
+
+void ChargingStation::resetQueue() {
+    this->queueLength = 0;
 }
 
 string ChargingStation::getCityName() {

@@ -58,8 +58,17 @@ int main()
      cout << Utility::headerBuilder(122);
      allocate.printAvgWaitingTime();
 
-     // Print overall waiting time
-     allocate.printOverallWaitingTime();
+     cout << "\n\nInitialising charging allocation..." << endl;
+     cout << Utility::headerBuilder(131);
+     cout << "Vehicle Id" << setw(15)
+          << "Origin" << setw(20)
+          << "Destination" << setw(25)
+          << "Capacity Range" << setw(20)
+          << "Remaining Range" << setw(20)
+          << "First Recharge" << setw(20)
+          << "Second Recharge" << endl;
+     cout << Utility::headerBuilder(131);
+     allocate.balancedSimulation();
 
      return 0;
 }
