@@ -9,18 +9,18 @@
 using namespace std;
 
 class DemandGenerator {
-
-public:
-    void generateDemands(string filename);
+private:
     int generateRandom(int min, int max, int offset = 0);
     int queryDemand();
+public:
+    void generateDemands(string filename);
 };
 
 void DemandGenerator::generateDemands(string filename) {
     srand(time(NULL)); 
     
     ofstream fout;
-    fout.open(filename + ".txt");
+    fout.open(filename);
 
     int demand = queryDemand();
 

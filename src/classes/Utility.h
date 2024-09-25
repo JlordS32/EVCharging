@@ -8,12 +8,20 @@ using namespace std;
 class Utility
 {
 public:
+    static string queryFile();
     static void removeStr(string &str, string target);
     static string *split(string str, string seperator, int &size);
     static string headerBuilder(int size);
-    static int sum(int *array, int size);
-    static int sum(vector<int> array);
 };
+
+string Utility::queryFile()
+{
+    string fileName;
+    cout << "Enter file name: ";
+    getline(cin, fileName);
+
+    return fileName;
+}
 
 string *Utility::split(string str, string seperator, int &size)
 {

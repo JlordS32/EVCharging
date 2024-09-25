@@ -22,7 +22,7 @@ private:
 
     int findClosestReachableStation(int remainRange);
     ChargingStation *allocateCharger(int index);
-    void checkCharge(Vehicle *vehicle, bool random = false);
+    string simulateCharge(Vehicle *vehicle);
     double getOverallWaitingTime();
 
 public:
@@ -31,8 +31,6 @@ public:
     void printChargingStations();
     void printChargeAllocation();
     void printAvgWaitingTime();
-    void balancedSimulation();
-    string queryFile();
 
     ChargingAllocation()
     {
@@ -42,15 +40,6 @@ public:
         }
     }
 };
-
-string ChargingAllocation::queryFile()
-{
-    string fileName;
-    cout << "Enter file name: ";
-    getline(cin, fileName);
-
-    return fileName;
-}
 
 void ChargingAllocation::run(string fileName)
 {
@@ -131,21 +120,18 @@ void ChargingAllocation::printChargeAllocation()
         vehicle.print();
 
         // Check for first charge
-        checkCharge(&vehicle);
+        string firstRecharge = simulateCharge(&vehicle);
+        cout << setw(20) << firstRecharge;
 
         // Check for second charge
-        checkCharge(&vehicle);
+        string secondRecharge = simulateCharge(&vehicle);
+        cout << setw(20) << secondRecharge;
 
         cout << endl;
     }
-
-    for (int i = 0; i < stations.size(); i++)
-    {
-        stations[i].resetQueue();
-    }
 }
 
-void ChargingAllocation::checkCharge(Vehicle *vehicle, bool random)
+string ChargingAllocation::simulateCharge(Vehicle *vehicle)
 {
     int remainingRange = vehicle->getRemainingRange();
     int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
@@ -155,17 +141,7 @@ void ChargingAllocation::checkCharge(Vehicle *vehicle, bool random)
     if (remainingRange < currentDistance)
     {
         // Find the closest station
-        int closestStation = -1;
-
-        if (random)
-        {
-            closestStation = findClosestReachableStation(currentLocationDistance + rand() % vehicle->getRemainingRange());
-        }
-        else
-        {
-            closestStation = findClosestReachableStation(currentLocationDistance + vehicle->getRemainingRange());
-        }
-
+        int closestStation = findClosestReachableStation(currentLocationDistance + vehicle->getRemainingRange());
         // Get station and increment queue
         ChargingStation *charger = allocateCharger(closestStation);
         charger->incrementQueueLength();
@@ -174,44 +150,10 @@ void ChargingAllocation::checkCharge(Vehicle *vehicle, bool random)
         vehicle->fillUp(vehicle->getCapacity());
         vehicle->updateLocation(closestStation);
 
-        // cout << setw(20) << charger->getCityName();
+        return charger->getCityName();
     }
-    else
-    {
-        // cout << setw(20) << "----";
-    }
-}
-
-void ChargingAllocation::balancedSimulation()
-{
-    double overallWaitingTime = 1000;
-    int numSimulations = 1000;
-    for (int i = 0; i < numSimulations; i++)
-    {
-        for (Vehicle vehicle : this->vehicles)
-        {
-            // vehicle.print();
-
-            // Check for first charge
-            checkCharge(&vehicle, true);
-
-            // Check for second charge
-            checkCharge(&vehicle, true);
-        }
-
-        double temp = getOverallWaitingTime();
-
-        for (int i = 0; i < stations.size(); i++)
-        {
-            stations[i].resetQueue();
-        }
-
-        if (temp < overallWaitingTime) {
-            overallWaitingTime = temp;
-        }
-    }
-
-    cout << "BEST: " << overallWaitingTime << " hours";
+    
+    return "----";
 }
 
 int ChargingAllocation::findClosestReachableStation(int remainRange)
@@ -236,15 +178,15 @@ ChargingStation *ChargingAllocation::allocateCharger(int index)
 
 double ChargingAllocation::getOverallWaitingTime()
 {
-    double n;
-    double m;
+    double n = 0;
+    double m = 0;
     for (ChargingStation &station : this->stations)
     {
         n += station.getQueueLength();
         m += station.getQueueLength() * station.getAvgWaitingTime();
     }
 
-    return (1 / n) * m;
+    return static_cast<double>(1 / n) * m;
 }
 
 #endif
