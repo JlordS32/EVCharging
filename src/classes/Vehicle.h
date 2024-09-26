@@ -3,8 +3,11 @@
 
 #include "../assets/Constant.h"
 #include <iomanip>
+#include <vector>
 
 using namespace std;
+
+#include "ChargingStation.h"
 
 class Vehicle
 {
@@ -14,9 +17,9 @@ private:
     int destinationId;
     int capacityRange;
     int remainRange;
-    
-public:
+    vector<ChargingStation *> stations;
 
+public:
     Vehicle(int vehicleId, int currentCityId, int destinationId, int capacityRange, int remainRange)
     {
         this->vehicleId = vehicleId;
@@ -35,10 +38,13 @@ public:
     int getDestinationId();
     int getCapacity();
     int getRemainingRange();
+    ChargingStation* getCharger(int id);
 
     // Setters
     void fillUp(int capacity);
     void updateLocation(int currentLocationId);
+    void resetState(Vehicle vehicle);
+    void charge(ChargingStation *station);
 };
 
 void Vehicle::print()
@@ -50,12 +56,15 @@ void Vehicle::print()
     cout << setw(20) << remainRange;
 }
 
-int Vehicle::farthestDistance() {
+int Vehicle::farthestDistance()
+{
     int totalDistance = 0;
     int range = this->remainRange;
 
-    for (int i = this->currentCityId; i <= this->destinationId; i++) {
-        if (range < 0) {
+    for (int i = this->currentCityId; i <= this->destinationId; i++)
+    {
+        if (range < 0)
+        {
             return totalDistance;
         }
 
@@ -66,32 +75,40 @@ int Vehicle::farthestDistance() {
     return totalDistance;
 }
 
-int Vehicle::getVehicleId() {
+int Vehicle::getVehicleId()
+{
     return this->vehicleId;
 }
 
-int Vehicle::getCurrentCityId() {
+int Vehicle::getCurrentCityId()
+{
     return this->currentCityId;
 }
-int Vehicle::getDestinationId() {
+int Vehicle::getDestinationId()
+{
     return this->destinationId;
 }
 
-int Vehicle::getCapacity() {
+int Vehicle::getCapacity()
+{
     return this->capacityRange;
 }
 
-int Vehicle::getRemainingRange() {
+int Vehicle::getRemainingRange()
+{
     return this->remainRange;
 }
 
-void Vehicle::fillUp(int capacity) {
-    if (capacity <= 0) {
+void Vehicle::fillUp(int capacity)
+{
+    if (capacity <= 0)
+    {
         cout << "\n\nError: Vehicle " << this->vehicleId << " cannot fill up. Capacity must be greater than 0." << endl;
         exit(1);
     }
-    
-    if (capacity > this->capacityRange) {
+
+    if (capacity > this->capacityRange)
+    {
         cout << "\n\nError: Vehicle " << this->vehicleId << " cannot fill up. Capacity range exceeded." << endl;
         exit(1);
     }
@@ -99,8 +116,24 @@ void Vehicle::fillUp(int capacity) {
     this->remainRange = capacity;
 }
 
-void Vehicle::updateLocation(int currentLocationId) {
+void Vehicle::updateLocation(int currentLocationId)
+{
     this->currentCityId = currentLocationId;
+}
+
+void Vehicle::resetState(Vehicle vehicle)
+{
+    this->currentCityId = vehicle.currentCityId;
+    this->capacityRange = vehicle.capacityRange;
+    this->remainRange = vehicle.remainRange;
+}
+
+void Vehicle::charge(ChargingStation *station) {
+    this->stations.push_back(station);
+}
+
+ChargingStation* Vehicle::getCharger(int id) {
+    return this->stations[id];
 }
 
 #endif

@@ -57,5 +57,8 @@ int main()
      cout << Utility::headerBuilder(122);
      allocate.printAvgWaitingTime();
 
+     // Balance the charging allocation
+     // allocate.simulateMultipleScenarios(5000);
+
      return 0;
 }
