@@ -33,9 +33,10 @@ public:
     void run(string fileName = "");
     void printVehicles();
     void printChargingStations();
+    void chargeVehicles();
     void printChargeAllocation();
     void printAvgWaitingTime();
-    void simulateMultipleScenarios(int numSimulations);
+    void useMonteCarlo(int numSimulations);
     void simulateRandomCharge(Vehicle *vehicle);
 
     ChargingAllocation()
@@ -120,7 +121,7 @@ void ChargingAllocation::printAvgWaitingTime()
     cout << "\nOVERALL AVG WAITING TIME FOR EACH VEHICLE: " << getOverallWaitingTime() << " hrs";
 }
 
-void ChargingAllocation::printChargeAllocation()
+void ChargingAllocation::chargeVehicles()
 {
     // Save initial vehicle state
     vector<Vehicle> initialVehicles = this->vehicles;
@@ -140,6 +141,34 @@ void ChargingAllocation::printChargeAllocation()
 
         // Assign second charger
         simulateCharge(&vehicle);
+
+        ChargingStation *secondCharger = vehicle.getCharger(1);
+        if (secondCharger != nullptr)
+            cout << setw(20) << secondCharger->getCityName();
+        else
+            cout << setw(20) << "----";
+
+        cout << endl;
+    }
+
+    // Restore
+    this->vehicles = initialVehicles;
+}
+
+void ChargingAllocation::printChargeAllocation()
+{
+    // Save initial vehicle state
+    vector<Vehicle> initialVehicles = this->vehicles;
+
+    for (Vehicle &vehicle : this->vehicles)
+    {
+        vehicle.print();
+
+        ChargingStation *firstCharger = vehicle.getCharger(0);
+        if (firstCharger != nullptr)
+            cout << setw(20) << firstCharger->getCityName();
+        else
+            cout << setw(20) << "----";
 
         ChargingStation *secondCharger = vehicle.getCharger(1);
         if (secondCharger != nullptr)
@@ -227,8 +256,9 @@ double ChargingAllocation::getOverallWaitingTime()
     return static_cast<double>(1 / n) * m;
 }
 
-void ChargingAllocation::simulateMultipleScenarios(int numSimulations)
+void ChargingAllocation::useMonteCarlo(int numSimulations)
 {
+    srand(time(0));
     double improvedWaitingTime = numeric_limits<double>::max();
     int simulationCount = 0;
 
@@ -275,23 +305,40 @@ void ChargingAllocation::simulateMultipleScenarios(int numSimulations)
         simulationCount++;
     }
 
+    cout << Utility::headerBuilder(131);
+    cout << "Vehicle Id" << setw(15)
+         << "Origin" << setw(20)
+         << "Destination" << setw(25)
+         << "Capacity Range" << setw(20)
+         << "Remaining Range" << setw(20)
+         << "First Recharge" << setw(20)
+         << "Second Recharge" << endl;
+    cout << Utility::headerBuilder(131);
+    printChargeAllocation();
+
     // Finally update the stations in this class with the best ones.
     this->stations = improvedStations;
 
-    // Output the average waiting time over all simulations
+    // Output the average waiting time over all simuclations
     cout << "\nAverage Waiting Time after "
          << numSimulations << " simulations: "
          << improvedWaitingTime << " hours"
          << endl
          << endl;
 
+    cout << Utility::headerBuilder(122);
+    cout << "Location Id" << setw(20)
+         << "Location Name" << setw(25)
+         << "Distance to Last City" << setw(25)
+         << "Number of Chargers" << setw(20)
+         << "Queue Length" << setw(20)
+         << "Waiting Hours" << endl;
+    cout << Utility::headerBuilder(122);
     printAvgWaitingTime();
 }
 
 void ChargingAllocation::simulateRandomCharge(Vehicle *vehicle)
 {
-    // srand(time(NULL));
-
     int remainingRange = vehicle->getRemainingRange();
     int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
     int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney(vehicle->getCurrentCityId());
@@ -311,6 +358,7 @@ void ChargingAllocation::simulateRandomCharge(Vehicle *vehicle)
 
             // Update remaining range to full and update location.
             int minimum = (vehicle->getCapacity() / 2) - 1;
+            vehicle->charge(charger);
             vehicle->fillUp(minimum + rand() % (vehicle->getCapacity() - minimum));
             vehicle->updateLocation(closestStation);
         }

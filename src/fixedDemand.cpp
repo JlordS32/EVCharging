@@ -44,7 +44,7 @@ int main()
           << "First Recharge" << setw(20)
           << "Second Recharge" << endl;
      cout << Utility::headerBuilder(131);
-     allocate.printChargeAllocation();
+     allocate.chargeVehicles();
 
      cout << "\n\nAVERAGE WAITING TIME: " << endl;
      cout << Utility::headerBuilder(122);
@@ -58,7 +58,7 @@ int main()
      allocate.printAvgWaitingTime();
 
      // Balance the charging allocation
-     allocate.simulateMultipleScenarios(5000);
+     allocate.useMonteCarlo(5000);
 
      return 0;
 }
