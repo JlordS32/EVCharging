@@ -58,7 +58,7 @@ int main()
      allocate.printAvgWaitingTime();
 
      // Balance the charging allocation
-     // allocate.simulateMultipleScenarios(5000);
+     allocate.simulateMultipleScenarios(5000);
 
      return 0;
 }
