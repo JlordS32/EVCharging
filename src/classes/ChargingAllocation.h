@@ -122,58 +122,65 @@ void ChargingAllocation::printAvgWaitingTime()
 
 void ChargingAllocation::printChargeAllocation()
 {
-    for (Vehicle vehicle : this->vehicles)
+    for (Vehicle &vehicle : this->vehicles)
     {
         vehicle.print();
 
         // Assign first charger
         simulateCharge(&vehicle);
+
         ChargingStation* firstCharger = vehicle.getCharger(0);
-        cout << setw(20) << firstCharger->getCityName();
+        if (firstCharger != nullptr)
+            cout << setw(20) << firstCharger->getCityName();
+        else
+            cout << setw(20) << "----";
+
+        // Assign second charger
+        simulateCharge(&vehicle);
+
+        ChargingStation* secondCharger = vehicle.getCharger(1);
+        if (secondCharger != nullptr)
+            cout << setw(20) << secondCharger->getCityName();
+        else
+            cout << setw(20) << "----";
 
         cout << endl;
     }
 }
 
-// void ChargingAllocation::printChargeAllocation(string firstRecharge, string secondRecharge)
-// {
-//     for (Vehicle vehicle : this->vehicles)
-//     {
-//         vehicle.print();
-
-//         // Check for first charge
-//         string firstRecharge = simulateCharge(&vehicle);
-//         cout << setw(20) << firstRecharge;
-
-//         // Check for second charge
-//         string secondRecharge = simulateCharge(&vehicle);
-//         cout << setw(20) << secondRecharge;
-
-//         cout << endl;
-//     }
-// }
 
 void ChargingAllocation::simulateCharge(Vehicle *vehicle)
 {
     int remainingRange = vehicle->getRemainingRange();
-    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
-    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney(vehicle->getCurrentCityId());
-    int currentDistance = destinationDistance - currentLocationDistance;
+    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney();
+    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney();
+    int requiredDistance = destinationDistance - currentLocationDistance;
 
-    if (remainingRange < currentDistance)
+    if (remainingRange < requiredDistance)
     {
-        // Find the closest station
+        // Find the closest reachable station
         int closestStation = findClosestReachableStation(currentLocationDistance + remainingRange);
-        // Get station and increment queue
-        ChargingStation *charger = allocateCharger(closestStation);
-        charger->incrementQueueLength();
 
-        // Update remaining range to full and update location.
-        vehicle->charge(charger);
-        vehicle->fillUp(vehicle->getCapacity());
-        vehicle->updateLocation(closestStation);
+        if (closestStation >= 0)
+        {
+            // Get station and increment queue
+            ChargingStation *charger = allocateCharger(closestStation);
+            charger->incrementQueueLength();
+
+            // Update remaining range to full and update location.
+            vehicle->charge(charger);
+            vehicle->fillUp(vehicle->getCapacity());
+            vehicle->updateLocation(closestStation);
+        }
+
+        // Error handling
+        else
+        {
+            cout << "\nError: Vehicle " << vehicle->getVehicleId() << " cannot reach any charging station!" << endl;
+        }
     }
 }
+
 
 int ChargingAllocation::findClosestReachableStation(int remainRange)
 {
@@ -192,8 +199,16 @@ int ChargingAllocation::findClosestReachableStation(int remainRange)
 
 ChargingStation *ChargingAllocation::allocateCharger(int index)
 {
-    return &this->stations[index];
+    if (index >= 0 && index < stations.size())
+    {
+        return &this->stations[index];
+    }
+    else
+    {
+        return nullptr;
+    }
 }
+
 
 double ChargingAllocation::getOverallWaitingTime()
 {
@@ -206,90 +221,6 @@ double ChargingAllocation::getOverallWaitingTime()
     }
 
     return static_cast<double>(1 / n) * m;
-}
-
-void ChargingAllocation::simulateMultipleScenarios(int numSimulations)
-{
-    double improvedWaitingTime = numeric_limits<double>::max();
-    int simulationCount = 0;
-
-    // Initialise a local copy
-    vector<Vehicle> initialVehicles = this->vehicles;
-    vector<Vehicle> tempVehicles = this->vehicles;
-    vector<ChargingStation> improvedStations = this->stations;
-
-    cout << "\n\nBalancing waiting queues with Monte-Carlo simulations..." << endl;
-    while (simulationCount < numSimulations)
-    {
-        // Reset queues at the start of each simulation
-        for (ChargingStation &station : stations)
-        {
-            station.resetQueue();
-        }
-
-        // Reset vehicles at the start of each simulation
-        tempVehicles = initialVehicles;
-
-        // Simulate charging for each vehicle
-        for (Vehicle &vehicle : tempVehicles)
-        {
-            // Check first recharge
-            simulateRandomCharge(&vehicle);
-
-            // Check second recharge
-            simulateRandomCharge(&vehicle);
-        }
-
-        double avgWaiting = getOverallWaitingTime();
-        if (avgWaiting < improvedWaitingTime)
-        {
-            // Update best stations
-            improvedStations = this->stations;
-
-            // Update best vehicles
-            this->vehicles = tempVehicles;
-
-            // Get improved time
-            improvedWaitingTime = avgWaiting;
-            cout << "Improved Waiting Time: " << avgWaiting << " hours at " << simulationCount << endl;
-        }
-        simulationCount++;
-    }
-
-    // Finally update the stations in this class with the best ones.
-    this->stations = improvedStations;
-
-    // Output the average waiting time over all simulations
-    cout << "\nAverage Waiting Time after "
-         << numSimulations << " simulations: "
-         << improvedWaitingTime << " hours"
-         << endl
-         << endl;
-
-    printAvgWaitingTime();
-}
-
-void ChargingAllocation::simulateRandomCharge(Vehicle *vehicle)
-{
-    int remainingRange = vehicle->getRemainingRange();
-    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
-    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney(vehicle->getCurrentCityId());
-    int currentDistance = destinationDistance - currentLocationDistance;
-
-    if (remainingRange < currentDistance)
-    {
-        // Find the closest station
-        int closestStation = findClosestReachableStation(currentLocationDistance + rand() % remainingRange);
-
-        // Get station and increment queue
-        ChargingStation *charger = allocateCharger(closestStation);
-        charger->incrementQueueLength();
-
-        // Update remaining range to full and update location.
-        int minimum = (vehicle->getCapacity() / 2) - 1;
-        vehicle->fillUp(minimum + rand() % (vehicle->getCapacity() - minimum));
-        vehicle->updateLocation(closestStation);
-    }
 }
 
 #endif

@@ -133,7 +133,10 @@ void Vehicle::charge(ChargingStation *station) {
 }
 
 ChargingStation* Vehicle::getCharger(int id) {
-    return this->stations[id];
+    if (id >= 0 && id < stations.size())
+        return this->stations[id];
+    else
+        return nullptr;
 }
 
 #endif
