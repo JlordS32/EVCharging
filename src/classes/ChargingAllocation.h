@@ -13,6 +13,7 @@
 #include "Utility.h"
 #include "Vehicle.h"
 #include "ChargingStation.h"
+#include "Display.h"
 #include "../assets/Constant.h"
 
 using namespace std;
@@ -31,6 +32,7 @@ private:
 
 public:
     void run(string fileName = "");
+    void print();
     void printVehicles();
     void printChargingStations();
     void chargeVehicles();
@@ -89,6 +91,21 @@ void ChargingAllocation::run(string fileName)
     fin.close();
 }
 
+void ChargingAllocation::print()
+{
+    Display::displayVehicleHeader();
+    printVehicles();
+
+    Display::displayChargingStationHeader();
+    printChargingStations();
+
+    Display::displayChargingAllocationHeader();
+    chargeVehicles();
+
+    Display::displayChargingStationQueueHeader();
+    printAvgWaitingTime();
+}
+
 void ChargingAllocation::printVehicles()
 {
     for (Vehicle &vehicle : this->vehicles)
@@ -128,28 +145,14 @@ void ChargingAllocation::chargeVehicles()
 
     for (Vehicle &vehicle : this->vehicles)
     {
-        vehicle.print();
-
         // Assign first charger
         simulateCharge(&vehicle);
 
-        ChargingStation *firstCharger = vehicle.getCharger(0);
-        if (firstCharger != nullptr)
-            cout << setw(20) << firstCharger->getCityName();
-        else
-            cout << setw(20) << "----";
-
         // Assign second charger
         simulateCharge(&vehicle);
-
-        ChargingStation *secondCharger = vehicle.getCharger(1);
-        if (secondCharger != nullptr)
-            cout << setw(20) << secondCharger->getCityName();
-        else
-            cout << setw(20) << "----";
-
-        cout << endl;
     }
+
+    printChargeAllocation();
 
     // Restore
     this->vehicles = initialVehicles;
@@ -157,9 +160,6 @@ void ChargingAllocation::chargeVehicles()
 
 void ChargingAllocation::printChargeAllocation()
 {
-    // Save initial vehicle state
-    vector<Vehicle> initialVehicles = this->vehicles;
-
     for (Vehicle &vehicle : this->vehicles)
     {
         vehicle.print();
@@ -178,9 +178,6 @@ void ChargingAllocation::printChargeAllocation()
 
         cout << endl;
     }
-
-    // Restore
-    this->vehicles = initialVehicles;
 }
 
 void ChargingAllocation::simulateCharge(Vehicle *vehicle)
@@ -258,7 +255,8 @@ double ChargingAllocation::getOverallWaitingTime()
 
 void ChargingAllocation::useMonteCarlo(int numSimulations)
 {
-    srand(time(0));
+    srand(time(NULL));
+
     double improvedWaitingTime = numeric_limits<double>::max();
     int simulationCount = 0;
 
@@ -305,15 +303,7 @@ void ChargingAllocation::useMonteCarlo(int numSimulations)
         simulationCount++;
     }
 
-    cout << Utility::headerBuilder(131);
-    cout << "Vehicle Id" << setw(15)
-         << "Origin" << setw(20)
-         << "Destination" << setw(25)
-         << "Capacity Range" << setw(20)
-         << "Remaining Range" << setw(20)
-         << "First Recharge" << setw(20)
-         << "Second Recharge" << endl;
-    cout << Utility::headerBuilder(131);
+    Display::displayChargingAllocationHeader();
     printChargeAllocation();
 
     // Finally update the stations in this class with the best ones.
@@ -326,14 +316,7 @@ void ChargingAllocation::useMonteCarlo(int numSimulations)
          << endl
          << endl;
 
-    cout << Utility::headerBuilder(122);
-    cout << "Location Id" << setw(20)
-         << "Location Name" << setw(25)
-         << "Distance to Last City" << setw(25)
-         << "Number of Chargers" << setw(20)
-         << "Queue Length" << setw(20)
-         << "Waiting Hours" << endl;
-    cout << Utility::headerBuilder(122);
+    Display::displayChargingStationQueueHeader();
     printAvgWaitingTime();
 }
 
@@ -357,7 +340,7 @@ void ChargingAllocation::simulateRandomCharge(Vehicle *vehicle)
             charger->incrementQueueLength();
 
             // Update remaining range to full and update location.
-            int minimum = (vehicle->getCapacity() / 2) - 1;
+            int minimum = (vehicle->getCapacity() / 1.5) - 1;
             vehicle->charge(charger);
             vehicle->fillUp(minimum + rand() % (vehicle->getCapacity() - minimum));
             vehicle->updateLocation(closestStation);
