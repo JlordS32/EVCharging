@@ -10,8 +10,8 @@ int main()
 {
      ChargingAllocation allocate;
 
-     // string fileName = Utility::queryFile();
-     allocate.run("RandomDemands.txt");
+     string fileName = Utility::queryFile();
+     allocate.run(fileName);
 
      // Print the results
      allocate.print();

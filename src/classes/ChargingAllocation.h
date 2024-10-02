@@ -9,10 +9,12 @@
 #include <limits>
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
 
 #include "Utility.h"
 #include "Vehicle.h"
 #include "ChargingStation.h"
+#include "Header.h"
 #include "Display.h"
 #include "../assets/Constant.h"
 
@@ -25,23 +27,19 @@ private:
     vector<ChargingStation> stations;
 
     int findClosestReachableStation(int remainRange);
-    int debug(int remainRange);
     ChargingStation *allocateCharger(int index);
     void simulateCharge(Vehicle *vehicle);
     double getOverallWaitingTime();
+    Display display;
 
 public:
     void run(string fileName = "");
     void print();
-    void printVehicles();
-    void printChargingStations();
     void chargeVehicles();
-    void printChargeAllocation();
-    void printAvgWaitingTime();
     void useMonteCarlo(int numSimulations);
     void simulateRandomCharge(Vehicle *vehicle);
 
-    ChargingAllocation()
+    ChargingAllocation() : display(&this->vehicles, &this->stations)
     {
         for (int i = 0; i < NUM_CITIES; i++)
         {
@@ -93,49 +91,17 @@ void ChargingAllocation::run(string fileName)
 
 void ChargingAllocation::print()
 {
-    Display::displayVehicleHeader();
-    printVehicles();
+    Header::displayVehicleHeader();
+    display.printVehicles();
 
-    Display::displayChargingStationHeader();
-    printChargingStations();
+    Header::displayChargingStationHeader();
+    display.printChargingStations();
 
-    Display::displayChargingAllocationHeader();
+    Header::displayChargingAllocationHeader();
     chargeVehicles();
 
-    Display::displayChargingStationQueueHeader();
-    printAvgWaitingTime();
-}
-
-void ChargingAllocation::printVehicles()
-{
-    for (Vehicle &vehicle : this->vehicles)
-    {
-        vehicle.print();
-        cout << endl;
-    }
-}
-
-void ChargingAllocation::printChargingStations()
-{
-    for (int i = 0; i < this->stations.size(); i++)
-    {
-        stations[i].print();
-        cout << endl;
-    }
-}
-
-void ChargingAllocation::printAvgWaitingTime()
-{
-    for (ChargingStation &station : this->stations)
-    {
-        station.print();
-
-        cout << setw(25) << station.getQueueLength();
-        cout << setw(20) << station.getAvgWaitingTime() << " hours";
-        cout << endl;
-    }
-
-    cout << "\nOVERALL AVG WAITING TIME FOR EACH VEHICLE: " << getOverallWaitingTime() << " hrs";
+    Header::displayChargingStationQueueHeader();
+    display.printAvgWaitingTime(getOverallWaitingTime());
 }
 
 void ChargingAllocation::chargeVehicles()
@@ -152,32 +118,10 @@ void ChargingAllocation::chargeVehicles()
         simulateCharge(&vehicle);
     }
 
-    printChargeAllocation();
+    display.printChargeAllocation();
 
     // Restore
     this->vehicles = initialVehicles;
-}
-
-void ChargingAllocation::printChargeAllocation()
-{
-    for (Vehicle &vehicle : this->vehicles)
-    {
-        vehicle.print();
-
-        ChargingStation *firstCharger = vehicle.getCharger(0);
-        if (firstCharger != nullptr)
-            cout << setw(20) << firstCharger->getCityName();
-        else
-            cout << setw(20) << "----";
-
-        ChargingStation *secondCharger = vehicle.getCharger(1);
-        if (secondCharger != nullptr)
-            cout << setw(20) << secondCharger->getCityName();
-        else
-            cout << setw(20) << "----";
-
-        cout << endl;
-    }
 }
 
 void ChargingAllocation::simulateCharge(Vehicle *vehicle)
@@ -303,8 +247,8 @@ void ChargingAllocation::useMonteCarlo(int numSimulations)
         simulationCount++;
     }
 
-    Display::displayChargingAllocationHeader();
-    printChargeAllocation();
+    Header::displayChargingAllocationHeader();
+    display.printChargeAllocation();
 
     // Finally update the stations in this class with the best ones.
     this->stations = improvedStations;
@@ -316,8 +260,8 @@ void ChargingAllocation::useMonteCarlo(int numSimulations)
          << endl
          << endl;
 
-    Display::displayChargingStationQueueHeader();
-    printAvgWaitingTime();
+    Header::displayChargingStationQueueHeader();
+    display.printAvgWaitingTime(getOverallWaitingTime());
 }
 
 void ChargingAllocation::simulateRandomCharge(Vehicle *vehicle)

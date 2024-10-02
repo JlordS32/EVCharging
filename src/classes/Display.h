@@ -2,65 +2,79 @@
 #define DISPLAY_H
 
 #include <iostream>
-#include <iomanip>
+#include <vector>
 
 using namespace std;
 
-#include "Utility.h"
-#include "Display.h"
+#include "Vehicle.h"
+#include "ChargingStation.h"
 
 class Display
 {
+private:
+    vector<Vehicle> *vehicles;
+    vector<ChargingStation> *stations;
+
 public:
-    static void displayVehicleHeader()
-    {
-        cout << "\n\nVEHICLE INFORMATION: " << endl;
-        cout << Utility::headerBuilder(91);
-        cout << "Vehicle Id" << setw(15)
-             << "Origin" << setw(20)
-             << "Destination" << setw(25)
-             << "Capacity Range" << setw(20)
-             << "Remaining Range" << endl;
-        cout << Utility::headerBuilder(91);
-    }
-
-    static void displayChargingStationHeader()
-    {
-        cout << "\n\nCHARGING STATION INFORMATION: " << endl;
-        cout << Utility::headerBuilder(82);
-        cout << "Location Id" << setw(20)
-             << "Location Name" << setw(25)
-             << "Distance to Last City" << setw(25)
-             << "Number of Chargers" << endl;
-        cout << Utility::headerBuilder(82);
-    }
-
-    static void displayChargingAllocationHeader()
-    {
-        cout << "\n\nInitialising charging allocation..." << endl;
-        cout << Utility::headerBuilder(131);
-        cout << "Vehicle Id" << setw(15)
-             << "Origin" << setw(20)
-             << "Destination" << setw(25)
-             << "Capacity Range" << setw(20)
-             << "Remaining Range" << setw(20)
-             << "First Recharge" << setw(20)
-             << "Second Recharge" << endl;
-        cout << Utility::headerBuilder(131);
-    }
-
-    static void displayChargingStationQueueHeader()
-    {
-        cout << "\n\nAVERAGE WAITING TIME: " << endl;
-        cout << Utility::headerBuilder(122);
-        cout << "Location Id" << setw(20)
-             << "Location Name" << setw(25)
-             << "Distance to Last City" << setw(25)
-             << "Number of Chargers" << setw(20)
-             << "Queue Length" << setw(20)
-             << "Waiting Hours" << endl;
-        cout << Utility::headerBuilder(122);
-    }
+    Display(vector<Vehicle> *vehicles, vector<ChargingStation> *stations) : vehicles(vehicles), stations(stations) {}
+    
+    void printVehicles();
+    void printChargingStations();
+    void printAvgWaitingTime(double overallWaitingTime);
+    void printChargeAllocation();
 };
+
+void Display::printVehicles()
+{
+    for (Vehicle &vehicle : *this->vehicles)
+    {
+        vehicle.print();
+        cout << endl;
+    }
+}
+
+void Display::printChargingStations()
+{
+    for (ChargingStation &station : *this->stations) {
+        station.print();
+        cout << endl;
+    }
+}
+
+void Display::printAvgWaitingTime(double overallWaitingTime)
+{
+    for (ChargingStation &station : *this->stations)
+    {
+        station.print();
+
+        cout << setw(25) << station.getQueueLength();
+        cout << setw(20) << station.getAvgWaitingTime() << " hours";
+        cout << endl;
+    }
+
+    cout << "\nOVERALL AVG WAITING TIME FOR EACH VEHICLE: " << overallWaitingTime << " hrs";
+}
+
+void Display::printChargeAllocation()
+{
+    for (Vehicle &vehicle : *this->vehicles)
+    {
+        vehicle.print();
+
+        ChargingStation *firstCharger = vehicle.getCharger(0);
+        if (firstCharger != nullptr)
+            cout << setw(20) << firstCharger->getCityName();
+        else
+            cout << setw(20) << "----";
+
+        ChargingStation *secondCharger = vehicle.getCharger(1);
+        if (secondCharger != nullptr)
+            cout << setw(20) << secondCharger->getCityName();
+        else
+            cout << setw(20) << "----";
+
+        cout << endl;
+    }
+}
 
 #endif
