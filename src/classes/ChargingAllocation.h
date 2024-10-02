@@ -260,7 +260,6 @@ void ChargingAllocation::useMonteCarlo(int numSimulations)
     cout << "\nAverage Waiting Time after "
          << numSimulations << " simulations: "
          << improvedWaitingTime << " hours"
-         << endl
          << endl;
 
     Header::displayChargingStationQueueHeader();
