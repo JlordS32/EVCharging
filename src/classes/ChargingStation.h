@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <ctime>
 #include "../assets/Constant.h"
 using namespace std;
 
@@ -81,7 +82,7 @@ int ChargingStation::getQueueLength() {
 }
 
 double ChargingStation::getAvgWaitingTime() {
-    return (0.5 * this->queueLength) / this->numberOfChargers;
+    return round(((0.5 * this->queueLength) / this->numberOfChargers) * 1000) / 1000;
 }
 
 void ChargingStation::incrementQueueLength() {

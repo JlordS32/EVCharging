@@ -48,6 +48,9 @@ public:
     }
 };
 
+/**
+ * 
+ */
 void ChargingAllocation::run(string fileName)
 {
     ifstream fin;
@@ -194,7 +197,7 @@ double ChargingAllocation::getOverallWaitingTime()
         m += station.getQueueLength() * station.getAvgWaitingTime();
     }
 
-    return static_cast<double>(1 / n) * m;
+    return round((static_cast<double>(1 / n) * m) * 1000) / 1000;
 }
 
 void ChargingAllocation::useMonteCarlo(int numSimulations)
