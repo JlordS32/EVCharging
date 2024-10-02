@@ -1,12 +1,12 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
-#include "../assets/Constant.h"
 #include <iomanip>
 #include <vector>
 
 using namespace std;
 
+#include "../assets/Constant.h"
 #include "ChargingStation.h"
 
 class Vehicle
