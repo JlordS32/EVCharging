@@ -29,15 +29,12 @@ using namespace std;
  */
 class Allocator {
 protected:
-    /// Vector of vehicles participating in the allocation.
+    // Class attributes
     vector<Vehicle> vehicles;
-
-    /// Vector of charging stations available for allocation.
     vector<ChargingStation> stations;
-
-    /// Display object for printing outputs.
     Display display;
 
+    // Class methods
     /**
      * @brief Finds the closest reachable charging station based on the remaining range.
      * 
@@ -100,6 +97,8 @@ Allocator::Allocator() : display(&this->vehicles, &this->stations)
 void Allocator::run(string fileName)
 {
     ifstream fin;
+
+    // Open file
     fin.open(fileName);
 
     // Validate file
@@ -136,6 +135,7 @@ void Allocator::run(string fileName)
         delete[] parts;
     }
 
+    // Close file
     fin.close();
 }
 

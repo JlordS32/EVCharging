@@ -38,10 +38,8 @@ void ChargingAllocation::chargeVehicles()
     // Display headers and initial information
     Header::displayVehicleHeader();
     this->display.printVehicles();
-
     Header::displayChargingStationHeader();
     this->display.printChargingStations();
-
     Header::displayChargingAllocationHeader();
 
     // Save the initial state of vehicles
