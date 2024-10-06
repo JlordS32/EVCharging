@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "./classes/DemandGenerator.h"
-#include "./classes/ChargingAllocation.h"
+#include "./classes/utilities/Utility.h"
 
 const int NUM_STATIONS = 12;
 

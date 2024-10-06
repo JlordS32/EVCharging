@@ -8,12 +8,11 @@ using namespace std;
 class ChargingAllocation : public Allocator
 {
 public:
-    void print();
     void chargeVehicles();
     void simulateCharge(Vehicle *vehicle);
 };
 
-void ChargingAllocation::print()
+void ChargingAllocation::chargeVehicles()
 {
     Header::displayVehicleHeader();
     this->display.printVehicles();
@@ -22,14 +21,6 @@ void ChargingAllocation::print()
     this->display.printChargingStations();
 
     Header::displayChargingAllocationHeader();
-    chargeVehicles();
-
-    Header::displayChargingStationQueueHeader();
-    this->display.printAvgWaitingTime(getOverallWaitingTime());
-}
-
-void ChargingAllocation::chargeVehicles()
-{
     // Save initial vehicle state
     vector<Vehicle> initialVehicles = this->vehicles;
 
@@ -46,6 +37,9 @@ void ChargingAllocation::chargeVehicles()
 
     // Restore
     this->vehicles = initialVehicles;
+
+    Header::displayChargingStationQueueHeader();
+    this->display.printAvgWaitingTime(getOverallWaitingTime());
 }
 
 void ChargingAllocation::simulateCharge(Vehicle *vehicle)

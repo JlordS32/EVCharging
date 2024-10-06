@@ -24,7 +24,7 @@ int main()
      optimise.run(fileName);
 
      // Print the results
-     allocate.print();
+     allocate.chargeVehicles();
      optimise.optimise(10000);
 
      return 0;
