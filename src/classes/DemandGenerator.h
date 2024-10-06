@@ -10,8 +10,10 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
-#include "../assets/Constant.h"
+
 using namespace std;
+
+#include "../assets/Constant.h"
 
 /**
  * @class DemandGenerator
