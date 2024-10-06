@@ -88,11 +88,6 @@ public:
     virtual ~Allocator() {};
 };
 
-/**
- * @brief Constructor for Allocator class.
- *
- * Initializes the charging stations and the display object.
- */
 Allocator::Allocator() : display(&this->vehicles, &this->stations)
 {
     // Initialize charging stations

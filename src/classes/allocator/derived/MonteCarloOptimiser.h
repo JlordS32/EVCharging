@@ -1,20 +1,47 @@
 #ifndef MONTECARLO_H
 #define MONTECARLO_H
 
-using namespace std;
-
+#include <vector>
+#include <ctime>
 #include "../base/Allocator.h"
 
+/**
+ * @class MonteCarloOptimiser
+ * @brief Implements a Monte Carlo optimization strategy for charging allocation.
+ *
+ * The MonteCarloOptimiser class uses random simulations to find an optimal charging
+ * allocation that minimizes the overall average waiting time at charging stations.
+ */
 class MonteCarloOptimiser : public Allocator
 {
 public:
+    /**
+     * @brief Constructor for MonteCarloOptimiser class.
+     *
+     * Initializes the random number generator.
+     */
     MonteCarloOptimiser()
     {
         srand(time(NULL));
     }
 
+    /**
+     * @brief Executes the Monte Carlo optimization process.
+     * @param numSimulations Number of simulations to run.
+     *
+     * Performs multiple simulations to find the charging allocation that results
+     * in the lowest average waiting time.
+     */
     void optimise(int numSimulations);
-    void simulateCharge(Vehicle *vehicle);
+
+    /**
+     * @brief Simulates charging for a single vehicle with randomization.
+     * @param vehicle Pointer to the Vehicle object to be charged.
+     *
+     * Determines if the vehicle needs charging, randomly selects a reachable
+     * charging station, and updates the vehicle's state.
+     */
+    void simulateCharge(Vehicle *vehicle) override;
 };
 
 void MonteCarloOptimiser::optimise(int numSimulations)
@@ -22,12 +49,14 @@ void MonteCarloOptimiser::optimise(int numSimulations)
     double improvedWaitingTime = numeric_limits<double>::max();
     int simulationCount = 0;
 
-    // Initialise a local copy
+    // Initialize local copies of vehicles and stations
     vector<Vehicle> initialVehicles = this->vehicles;
     vector<Vehicle> tempVehicles = this->vehicles;
     vector<ChargingStation> improvedStations = this->stations;
 
     cout << "\n\nBalancing waiting queues with Monte-Carlo simulations..." << endl;
+
+    // Run simulations
     while (simulationCount < numSimulations)
     {
         // Reset queues at the start of each simulation
@@ -42,79 +71,93 @@ void MonteCarloOptimiser::optimise(int numSimulations)
         // Simulate charging for each vehicle
         for (Vehicle &vehicle : tempVehicles)
         {
-            // Check first recharge
+            // Simulate first charge
             simulateCharge(&vehicle);
 
-            // Check second recharge
+            // Simulate second charge
             simulateCharge(&vehicle);
         }
 
+        // Calculate the average waiting time
         double avgWaiting = getOverallWaitingTime();
+
+        // Check if the current simulation has improved waiting time
         if (avgWaiting < improvedWaitingTime)
         {
-            // Update best stations
+            // Update best stations and vehicles
             improvedStations = this->stations;
-
-            // Update best vehicles
             this->vehicles = tempVehicles;
 
-            // Get improved time
+            // Update improved waiting time
             improvedWaitingTime = avgWaiting;
-            cout << "Improved Waiting Time: " << avgWaiting << " hours at " << simulationCount << endl;
+            cout << "Improved Waiting Time: " << avgWaiting << " hours at simulation "
+                 << simulationCount << endl;
         }
+
         simulationCount++;
     }
 
+    // Display the optimized charging allocation
     Header::displayChargingAllocationHeader();
     display.printChargeAllocation();
 
-    // Finally update the stations in this class with the best ones.
+    // Update stations with the best ones found
     this->stations = improvedStations;
 
-    // Output the average waiting time over all simuclations
+    // Display the final average waiting time
     cout << "\nAverage Waiting Time after "
          << numSimulations << " simulations: "
          << improvedWaitingTime << " hours"
          << endl;
 
+    // Display the charging station queue information
     Header::displayChargingStationQueueHeader();
-    display.printAvgWaitingTime(getOverallWaitingTime());
+    this->display.printAvgWaitingTime(getOverallWaitingTime());
 }
 
 void MonteCarloOptimiser::simulateCharge(Vehicle *vehicle)
+{
+    // Get vehicle's current remaining range
+    int remainingRange = vehicle->getRemainingRange();
+
+    // Calculate distances
+    int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney();
+    int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney();
+    int requiredDistance = destinationDistance - currentLocationDistance;
+
+    // Check if the vehicle needs charging
+    if (remainingRange < requiredDistance)
     {
-        int remainingRange = vehicle->getRemainingRange();
-        int destinationDistance = this->stations[vehicle->getDestinationId()].distanceToSydney(vehicle->getDestinationId());
-        int currentLocationDistance = this->stations[vehicle->getCurrentCityId()].distanceToSydney(vehicle->getCurrentCityId());
-        int currentDistance = destinationDistance - currentLocationDistance;
+        // Randomly determine total range for finding a station
+        int totalRange = currentLocationDistance + rand() % remainingRange;
 
-        if (remainingRange < currentDistance)
+        // Find the closest reachable charging station
+        int closestStation = findClosestReachableStation(totalRange);
+
+        if (closestStation >= 0)
         {
-            // Find the closest station
-            int totalRange = currentLocationDistance + rand() % remainingRange;
-            int closestStation = findClosestReachableStation(totalRange);
+            // Allocate the charger at the closest station
+            ChargingStation *charger = allocateCharger(closestStation);
+            charger->incrementQueueLength();
 
-            if (closestStation >= 0)
-            {
-                // Get station and increment queue
-                ChargingStation *charger = allocateCharger(closestStation);
-                charger->incrementQueueLength();
+            // Calculate a random amount to fill up (between minimum and capacity)
+            int minimum = static_cast<int>(vehicle->getCapacity() / 1.5) - 1;
+            int fillAmount = minimum + rand() % (vehicle->getCapacity() - minimum);
 
-                // Update remaining range to full and update location.
-                int minimum = (vehicle->getCapacity() / 1.5) - 1;
-                vehicle->charge(charger);
-                vehicle->fillUp(minimum + rand() % (vehicle->getCapacity() - minimum));
-                vehicle->updateLocation(closestStation);
-            }
-
-            // Error handling
-            else
-            {
-                cout << "\nError: Vehicle " << vehicle->getVehicleId() << " cannot reach any charging station!" << endl;
-                cout << "Closest station: " << closestStation << endl;
-                exit(1);
-            }
+            // Update vehicle's state after charging
+            vehicle->charge(charger);
+            vehicle->fillUp(fillAmount);
+            vehicle->updateLocation(closestStation);
+        }
+        else
+        {
+            // Error handling if no station is reachable
+            cout << "\nError: Vehicle " << vehicle->getVehicleId()
+                 << " cannot reach any charging station!" << endl;
+            cout << "Closest station: " << closestStation << endl;
+            exit(1);
         }
     }
+}
 
-#endif
+#endif // MONTECARLO_H
